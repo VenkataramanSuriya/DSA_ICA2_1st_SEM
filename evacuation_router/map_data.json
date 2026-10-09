@@ -1,0 +1,43 @@
+{
+  "city_name": "Rivermead District",
+  "description": "Urban evacuation network for Rivermead District. 12 intersections (A-L) in a 4x3 grid layout with 3 emergency shelters.",
+  "nodes": [
+    {"id": "A", "label": "Apex Ave / 1st St",     "x": 120, "y": 100, "type": "normal"},
+    {"id": "B", "label": "Brook Rd / 1st St",      "x": 320, "y": 100, "type": "normal"},
+    {"id": "C", "label": "Crown St / 1st St",      "x": 520, "y": 100, "type": "normal"},
+    {"id": "D", "label": "Delta Blvd / 1st St",    "x": 720, "y": 100, "type": "shelter"},
+    {"id": "E", "label": "Apex Ave / 2nd St",      "x": 120, "y": 280, "type": "normal"},
+    {"id": "F", "label": "Brook Rd / 2nd St",      "x": 320, "y": 280, "type": "normal"},
+    {"id": "G", "label": "Crown St / 2nd St",      "x": 520, "y": 280, "type": "normal"},
+    {"id": "H", "label": "Delta Blvd / 2nd St",    "x": 720, "y": 280, "type": "normal"},
+    {"id": "I", "label": "Apex Ave / 3rd St",      "x": 120, "y": 460, "type": "shelter"},
+    {"id": "J", "label": "Brook Rd / 3rd St",      "x": 320, "y": 460, "type": "normal"},
+    {"id": "K", "label": "Crown St / 3rd St",      "x": 520, "y": 460, "type": "shelter"},
+    {"id": "L", "label": "Delta Blvd / 3rd St",    "x": 720, "y": 460, "type": "normal"}
+  ],
+  "edges": [
+    {"id": "e01", "from": "A", "to": "B", "weight": 4},
+    {"id": "e02", "from": "B", "to": "C", "weight": 5},
+    {"id": "e03", "from": "C", "to": "D", "weight": 3},
+    {"id": "e04", "from": "A", "to": "E", "weight": 4},
+    {"id": "e05", "from": "B", "to": "F", "weight": 4},
+    {"id": "e06", "from": "C", "to": "G", "weight": 4},
+    {"id": "e07", "from": "D", "to": "H", "weight": 4},
+    {"id": "e08", "from": "E", "to": "F", "weight": 5},
+    {"id": "e09", "from": "F", "to": "G", "weight": 4},
+    {"id": "e10", "from": "G", "to": "H", "weight": 5},
+    {"id": "e11", "from": "E", "to": "I", "weight": 4},
+    {"id": "e12", "from": "F", "to": "J", "weight": 5},
+    {"id": "e13", "from": "G", "to": "K", "weight": 4},
+    {"id": "e14", "from": "H", "to": "L", "weight": 4},
+    {"id": "e15", "from": "I", "to": "J", "weight": 4},
+    {"id": "e16", "from": "J", "to": "K", "weight": 5},
+    {"id": "e17", "from": "K", "to": "L", "weight": 3},
+    {"id": "e18", "from": "A", "to": "F", "weight": 6},
+    {"id": "e19", "from": "B", "to": "G", "weight": 6},
+    {"id": "e20", "from": "F", "to": "K", "weight": 7},
+    {"id": "e21", "from": "G", "to": "L", "weight": 6},
+    {"id": "e22", "from": "C", "to": "H", "weight": 6}
+  ],
+  "shelters": ["D", "I", "K"]
+}
