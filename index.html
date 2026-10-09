@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban Disaster Evacuation & Smart Traffic Router</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0f1117;
+      --bg-panel: #1a1d27;
+      --bg-card: #232736;
+      --bg-card2: #1e2130;
+      --text-primary: #e8eaed;
+      --text-muted: #9aa0a6;
+      --text-dim: #5f6368;
+      --accent-blue: #4c8dff;
+      --accent-blue-hover: #3a7de8;
+      --success: #34a853;
+      --warning: #f4b400;
+      --danger: #ea4335;
+      --orange: #ff6d00;
+      --border: #2d3148;
+      --map-bg: #12141e;
+      --map-grid: #1c1f2e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Header ── */
+    header {
+      background-color: var(--bg-panel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+      border-left: 4px solid var(--accent-blue);
+      flex-shrink: 0;
+    }
+
+    .title-group h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-group p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .status-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+    }
+
+    .chip-ready { background-color: #1a4a2e; color: var(--success); }
+    .chip-active { background-color: #003a4a; color: #00d4ff; }
+    .chip-reroute { background-color: #3d2e00; color: var(--warning); }
+    .chip-noroute { background-color: #3a0d09; color: var(--danger); }
+
+    /* ── Main Layout ── */
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    /* ── Map Canvas Container ── */
+    .map-container {
+      flex: 1;
+      position: relative;
+      background-color: var(--map-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .legend {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      background: rgba(26, 29, 39, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* ── Sidebar ── */
+    aside {
+      width: 340px;
+      background-color: var(--bg-panel);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      padding: 0 16px;
+    }
+
+    .banner-danger {
+      background-color: var(--danger);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      margin: 12px 16px 0;
+      border-radius: 8px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .controls-section {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-value.sm {
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      word-break: break-all;
+    }
+
+    .start-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .start-value {
+      font-weight: 600;
+      color: var(--warning);
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-blue);
+      color: white;
+    }
+    .btn-primary:hover { background-color: var(--accent-blue-hover); }
+
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background-color: var(--bg-card2); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-card);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: var(--border);
+      margin: 4px 16px 12px;
+    }
+
+    /* ── Analytics ── */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 16px;
+      margin-bottom: 8px;
+    }
+
+    .analytics-full {
+      padding: 0 16px;
+      margin-bottom: 8px;
+    }
+
+    /* ── History Log ── */
+    .history-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 16px 16px;
+      min-height: 180px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .history-box {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-item {
+      padding: 6px;
+      border-radius: 4px;
+      background-color: var(--bg-card2);
+      border-left: 3px solid var(--accent-blue);
+      line-height: 1.4;
+    }
+
+    .log-item.fail {
+      border-left-color: var(--danger);
+    }
+
+    .log-time { color: var(--text-dim); }
+    .log-route { color: var(--accent-blue); font-weight: 600; }
+    .log-stats { color: var(--text-muted); }
+
+    /* ── Tooltip ── */
+    #tooltip {
+      position: absolute;
+      background-color: var(--bg-panel);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      pointer-events: none;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    /* ── Status Bar ── */
+    footer {
+      background-color: var(--bg-panel);
+      padding: 6px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="title-group">
+      <h1>🚨 Urban Disaster Evacuation & Smart Traffic Router</h1>
+      <p id="citySubtitle">District: Rivermead District • 12 Intersections • 22 Roads • 3 Shelters</p>
+    </div>
+    <div id="statusChip" class="status-chip chip-ready">● SYSTEM READY</div>
+  </header>
+
+  <!-- Main Grid -->
+  <main>
+    <!-- Map Canvas Area -->
+    <div class="map-container">
+      <canvas id="mapCanvas"></canvas>
+      <div id="tooltip"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#4a4e6a"></div> Normal</div>
+        <div class="legend-item"><div class="legend-color" style="background:#f4b400"></div> Hazard 2×</div>
+        <div class="legend-item"><div class="legend-color" style="background:#ff6d00"></div> Hazard 3×</div>
+        <div class="legend-item"><div class="legend-color" style="background:#ea4335"></div> Blocked</div>
+        <div class="legend-item"><div class="legend-color" style="background:#00d4ff"></div> Evacuation Route</div>
+        <div class="legend-item"><div class="legend-color" style="background:#34a853"></div> Shelter [✚]</div>
+      </div>
+    </div>
+
+    <!-- Sidebar Controls & Analytics -->
+    <aside>
+      <div id="noRouteBanner" class="banner-danger">
+        <span>⚠</span> No safe route available — all shelters unreachable.
+      </div>
+
+      <div class="controls-section">
+        <div class="section-title">CONTROLS</div>
+        <div class="card start-card">
+          <div class="card-label">EVACUATION ORIGIN</div>
+          <div id="startNodeDisplay" class="start-value">Click any node on map</div>
+        </div>
+
+        <button id="btnRun" class="btn btn-primary">🚀 Run Evacuation</button>
+        <button id="btnReset" class="btn btn-secondary">↺ Reset All Hazards</button>
+
+        <label class="toggle-row">
+          <input type="checkbox" id="chkCompare" />
+          <span>Compare to Normal Route</span>
+        </label>
+
+        <button id="btnExport" class="btn btn-secondary">💾 Export History Log</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-title">LIVE ANALYTICS</div>
+      <div class="analytics-grid">
+        <div class="card">
+          <div class="card-label">TRAVEL TIME</div>
+          <div id="valTime" class="card-value" style="color: var(--success)">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">DESTINATION</div>
+          <div id="valDest" class="card-value" style="color: var(--success)">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">NODES VISITED</div>
+          <div id="valVisited" class="card-value" style="color: var(--accent-blue)">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">EXECUTION TIME</div>
+          <div id="valExec" class="card-value" style="font-size: 1rem; color: var(--text-muted)">—</div>
+        </div>
+      </div>
+      <div class="analytics-full">
+        <div class="card">
+          <div class="card-label">OPTIMAL PATH</div>
+          <div id="valPath" class="card-value sm" style="color: var(--accent-blue)">—</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="history-section">
+        <div class="history-header">
+          <div class="section-title" style="padding:0; margin:0">PATH HISTORY</div>
+          <button id="btnClearLog" style="background:none; border:none; color:var(--text-muted); font-size:0.75rem; cursor:pointer">Clear</button>
+        </div>
+        <div id="historyBox" class="history-box"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Footer Status Bar -->
+  <footer>
+    <span id="statusBar">ℹ Click any node on the map to set origin. Left-click road to toggle Blocked, Right-click to cycle Hazard multiplier (1× → 2× → 3×).</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
