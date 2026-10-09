@@ -17,17 +17,26 @@ if _HERE not in sys.path:
 from ui import EvacuationApp
 
 
-def main() -> None:
-    """
-    Application entry point.
+def handler(environ, start_response):
+    """WSGI compatibility handler for Vercel deployment."""
+    start_response("200 OK", [("Content-Type", "text/html; charset=utf-8")])
+    index_path = os.path.join(_HERE, "index.html")
+    if os.path.exists(index_path):
+        with open(index_path, "rb") as f:
+            return [f.read()]
+    return [b"Evacuation Router Online"]
 
-    Instantiates and launches the EvacuationApp dashboard.
-    All graph loading, window creation, and event loops are
-    managed by the EvacuationApp class in ui.py.
-    """
-    app = EvacuationApp()
-    app.run()
+
+def main() -> None:
+    """Instantiate and launch the desktop EvacuationApp dashboard."""
+    app_instance = EvacuationApp()
+    app_instance.run()
+
+
+app = handler
 
 
 if __name__ == "__main__":
     main()
+
+
